@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 
 const Body = () => {
@@ -9,15 +8,18 @@ const Body = () => {
   }, []);
 
   const getItems = () => {
-    if(!localStorage.getItem('key')) return;
+    if (!localStorage.getItem("key")) return;
     const allTasks = JSON.parse(localStorage.getItem("key"));
     setTask(allTasks);
-    console.log(task)
+    console.log(task);
   };
 
   const handleAdd = () => {
     if (newTask.trim()) {
-      const updatedTasks = [...task, newTask.trim()];
+      const updatedTasks = [
+        ...task,
+        { text: newTask.trim(), isCompleted: false },
+      ];
       setTask(updatedTasks);
       localStorage.setItem("key", JSON.stringify(updatedTasks));
       setNewTask("");
@@ -28,7 +30,7 @@ const Body = () => {
   };
 
   const handleEdit = (index) => {
-    setNewTask(task[index]);
+    setNewTask(task[index].text);
     const filteredItems = task.filter((_, i) => {
       return i !== index;
     });
@@ -41,12 +43,21 @@ const Body = () => {
       //   return item !== task[index];
     });
     setTask(itemsNotDeleted);
-    localStorage.setItem('key', JSON.stringify(itemsNotDeleted));
+    localStorage.setItem("key", JSON.stringify(itemsNotDeleted));
   };
 
-  const handleCheckBox = (index) => {
+  const toggleCheckBox = (index) => {
+    // const copyTask = [...task]
+    // copyTask[index].isCompleted = !copyTask[index].isCompleted;
+    // setTask(copyTask);
+    // localStorage.setItem('key', JSON.stringify(copyTask));
 
-  }
+    const copyTask = task.map((item, i) => {
+      return i === index ? {...item, isCompleted: !item.isCompleted}: item
+    })
+    setTask(copyTask);
+    localStorage.setItem('key', JSON.stringify(copyTask));
+  };
 
   return (
     <div className="flex justify-center">
@@ -70,8 +81,14 @@ const Body = () => {
             {task.map((task, index) => (
               <li className="flex justify-between w-1/2 p-1" key={index}>
                 <div>
-                  <input type="checkbox" />
-                  <span className="pl-2">{task}</span>
+                  <input
+                    onChange={() => toggleCheckBox(index)}
+                    checked={task.isCompleted}
+                    type="checkbox"
+                  />
+                  <span className={ task.isCompleted ? "line-through" : " " }>
+                    {task.text}
+                  </span>
                 </div>
                 <div className="flex gap-3">
                   <button
